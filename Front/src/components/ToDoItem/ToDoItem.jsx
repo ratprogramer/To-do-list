@@ -1,4 +1,5 @@
 import { useState } from "react"
+import './ToDoItem.css'
 
 export const ToDoItem = ({ task, onToggle, onDelete, onEdit }) => {
   const [isEditing, setIsEditing] = useState(false)
