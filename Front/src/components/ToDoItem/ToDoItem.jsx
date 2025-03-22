@@ -11,13 +11,13 @@ export const ToDoItem = ({ task, onToggle, onDelete, onEdit }) => {
   }
 
   const cancelEdit = () => {
-    setEditText(task.text)
+    setEditText(task.description)
     setIsEditing(false)
   }
 
   return (
-    <li className={`todoItem ${task.completed ? "completed" : ""}`}>
-      <input type="checkbox" checked={task.completed} onChange={() => onToggle(task.id)} className="todoCheckbox" />
+    <li className={`todoItem ${task.is_completed ? "completed" : ""}`}>
+      <input type="checkbox" checked={task.is_completed} onChange={() => onToggle(task.id, task.is_completed)} className="todoCheckbox" />
 
       {isEditing ? (
         <div className="editContainer">
@@ -62,7 +62,7 @@ export const ToDoItem = ({ task, onToggle, onDelete, onEdit }) => {
         </div>
       ) : (
         <>
-          <span className="todoText">{task.text}</span>
+          <span className="todoText">{task.description}</span>
           <div className="todoActions">
             <button onClick={() => setIsEditing(true)} className="editButton">
               <svg

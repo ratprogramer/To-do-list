@@ -11,11 +11,26 @@ export const App = () => {
   const [tasks, setTasks] = useState([])
 
   useEffect(() => {
-    const savedTasks = localStorage.getItem("tasks")
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks))
+    const fetchData = async () => {
+
+      try {
+        const response = await fetch("http://localhost:3001/", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+      
+        if (!response.ok) throw new Error("Error al obtener las tareas");
+      
+        const tasks = await response.json(); 
+        setTasks(tasks)
+        
+      } catch (error) {
+        console.error("Error al obtener tareas:", error);
+
+      }
     }
-  }, [])
+    fetchData()
+  }, [tasks])
 
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks))
@@ -26,27 +41,77 @@ export const App = () => {
       const newTask = {
         id: Date.now(),
         text,
-        completed: false,
+        is_completed: false,
       }
       setTasks([...tasks, newTask])
     }
   }
 
-  const toggleTask = (id) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)))
-  }
+  const toggleTask = async (id, currentStatus) => {
+    try {
+      const response = await fetch(`http://localhost:3001/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_completed: !currentStatus }), 
+      });
+  
+      if (!response.ok) throw new Error("Error al actualizar la tarea");
+  
+      
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, is_completed: !currentStatus } : task
+        )
+      );
+    } catch (error) {
+      console.error("Error al actualizar tarea:", error);
+      alert("Hubo un problema al actualizar la tarea.");
+    }
+  };
 
   const deleteTask = (id) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/${id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+    
+        if (!response.ok) throw new Error("Error al eliminar la tarea");
+
+      } catch (error) {
+        console.error("Error al eliminar tarea:", error);
+        alert("Hubo un problema al eliminar la tarea.");
+      }
+    }
+    fetchData()
     setTasks(tasks.filter((task) => task.id !== id))
   }
 
-  const editTask = (id, newText) => {
-    setTasks(tasks.map((task) => (task.id === id ? { ...task, text: newText } : task)))
-  }
+  const editTask = async (id, newText) => {
+    try {
+      const response = await fetch(`http://localhost:3001/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: newText }),
+      });
+  
+      if (!response.ok) throw new Error("Error al actualizar la tarea");
+  
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === id ? { ...task, description: newText } : task
+        )
+      );
+    } catch (error) {
+      console.error("Error al actualizar la tarea:", error);
+      alert("Hubo un problema al actualizar la tarea.");
+    }
+  };
 
-  const pendingTasks = tasks.filter((task) => !task.completed)
+  const pendingTasks = tasks.filter((task) => !task.is_completed)
 
-  const completedTasks = tasks.filter((task) => task.completed)
+  const completedTasks = tasks.filter((task) => task.is_completed)
 
   return (
     <main className='AppContainer'>
